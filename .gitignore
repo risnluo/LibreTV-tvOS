@@ -1,0 +1,17 @@
+# Xcode / Swift generated files
+.DS_Store
+.build/
+.swiftpm/
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.ipa
+*.xcarchive
+*.dSYM/
+*.mobileprovision
+*.p12
+*.p8
+*.key
+.env
+.env.*
