@@ -1,0 +1,34 @@
+name: build-tvos-ipa
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Xcode
+        run: xcodebuild -version && xcodebuild -showsdks | grep -i tvos
+      - name: Build (unsigned)
+        run: |
+          xcodebuild -project LibreTV.xcodeproj -scheme LibreTV \
+            -configuration Release -sdk appletvos \
+            -destination 'generic/platform=tvOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build
+      - name: Package unsigned ipa
+        run: |
+          APP=$(find build/Build/Products -maxdepth 3 -name 'LibreTV.app' | head -1)
+          echo "APP=$APP"
+          test -n "$APP"
+          mkdir -p out/Payload
+          cp -R "$APP" out/Payload/
+          cd out && zip -qry ../LibreTV-tvOS-unsigned.ipa Payload
+          ls -lh ../LibreTV-tvOS-unsigned.ipa
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LibreTV-tvOS-unsigned
+          path: LibreTV-tvOS-unsigned.ipa
